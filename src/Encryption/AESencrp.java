@@ -25,17 +25,13 @@ import sun.misc.*;
 public class AESencrp {
 
     private static final String ALGO = "AES";
-    private static byte[] keyValue = getKeyValueString(); /* = new byte[] { 'T', 'h', 'e', 'B', 'e', 's', 't',
-                    'S', 'e', 'c', 'r','e', 't', 'K', 'e', 'y' }; */
+    private static byte[] keyValue = getKeyValueString();
 
     /** create a random string to use as keyword for encryption **/
     private static String getRandomString(){
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst";
         Random rng = new Random();
         String usedKey = RandomString.generateString(rng, chars, 15);
-        String timeStamp = RandomString.GetCurrentTimeStamp();
-        String saveKey = timeStamp + " Key: " + usedKey;
-        RandomString.saveDetails(saveKey);
         return usedKey;
     }
 
@@ -56,6 +52,11 @@ public class AESencrp {
     }
 
     public static String encrypt(String Data) throws Exception {
+        System.out.println("Mac Address: " + Data);
+        String timeStamp = RandomString.GetCurrentTimeStamp();
+        String saveKey = timeStamp + " Key: " + keyValue;
+        RandomString.saveDetails(saveKey);
+        //Checker.setMacAddress(Data);
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGO);
         c.init(Cipher.ENCRYPT_MODE, key);
