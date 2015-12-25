@@ -35,14 +35,14 @@ public class AESencrp {
         return usedKey;
     }
 
-    /** use SHA-1 to generate a hash from your key and trim the result to 128 bit */
+    /** use SHA-1 to generate a hash from your key and trim the result to 128 bit (16 bytes) */
     public static byte[] getKeyValueString() {
         String keyValueString = getRandomString();
         System.out.println("Generated String: " + keyValueString);
         byte[] key = (keyValueString).getBytes(Charset.forName("UTF-8"));
         MessageDigest sha = null;
         try {
-            sha = MessageDigest.getInstance("SHA-1");
+            sha = MessageDigest.getInstance("SHA-1"); // produces a 160-bit (20-byte) hash value
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

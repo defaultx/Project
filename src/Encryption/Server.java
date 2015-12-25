@@ -10,7 +10,7 @@ import java.io.IOException;
  * Multi threaded server
  */
 public class Server implements Runnable {
-protected int          serverPort   = 85;
+protected int          serverPort   = 8081;
 protected ServerSocket serverSocket = null;
 protected boolean      isStopped    = false;
 protected Thread       runningThread= null;
@@ -62,7 +62,7 @@ protected Thread       runningThread= null;
         try {
             this.serverSocket = new ServerSocket(this.serverPort);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot open port 85", e);
+            throw new RuntimeException("Cannot open port 8080", e);
         }
     }
 
