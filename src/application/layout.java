@@ -24,7 +24,7 @@ public class layout {
 
     static Connection conn = null;
     static Statement stmt = null;
-    private static String databaseURL = "jdbc:mysql://localhost:3306/exam?autoReconnect=true&amp;useSSL=false";
+    private static String databaseURL = "jdbc:mysql://localhost:3306/defaultx?autoReconnect=true&amp;useSSL=false";
     private static String username = "root";
     private static String password = "password";
     private static ResultSet rset = null;
@@ -151,7 +151,7 @@ public class layout {
             stmt = conn.createStatement();
             // We shall manage our transaction (because multiple SQL statements issued)
             conn.setAutoCommit(false);
-            rset = stmt.executeQuery("SELECT * FROM forum");
+            rset = stmt.executeQuery("SELECT fname, email, pass FROM users");
             int totalCount = 0, activeCount = 0, inActiveCount = 0;
             emails_txtArea.setText(null);
             names_txtArea.setText(null);
@@ -160,11 +160,11 @@ public class layout {
             while (rset.next()) {
                 names_txtArea.append(rset.getString("fname") + "\n-------------------------------------\n");
                 emails_txtArea.append(rset.getString("email") + "\n-------------------------------------\n");
-                if (rset.getString("phone").isEmpty()) {
+                if (rset.getString("pass").isEmpty()) {
                     //passes_txtArea.append("null");
                     inActiveCount++;
                 } else {
-                    passes_txtArea.append(rset.getString("phone") + "\n-------------------------------------\n");
+                    passes_txtArea.append(rset.getString("pass") + "\n-------------------------------------\n");
                     activeCount++;
                 }
                 totalCount++;
@@ -172,6 +172,7 @@ public class layout {
             top_labelA1.setText(String.valueOf(totalCount));
             top_labelA2.setText(String.valueOf(activeCount));
             top_labelA3.setText(String.valueOf(inActiveCount));
+            conn.commit();
 
         } catch (SQLException e1) {
             e1.printStackTrace();
