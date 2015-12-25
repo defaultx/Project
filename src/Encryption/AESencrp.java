@@ -25,7 +25,7 @@ import sun.misc.*;
 public class AESencrp {
 
     private static final String ALGO = "AES";
-    private static byte[] keyValue = getKeyValueString();
+    private static byte[] keyValue;// = getKeyValueString();
 
     /** create a random string to use as keyword for encryption **/
     private static String getRandomString(){
@@ -54,10 +54,10 @@ public class AESencrp {
     public static String encrypt(String Data) throws Exception {
         System.out.println("Mac Address: " + Data);
         String timeStamp = RandomString.GetCurrentTimeStamp();
-        String saveKey = timeStamp + " Key: " + keyValue;
-        RandomString.saveDetails(saveKey);
         //Checker.setMacAddress(Data);
         Key key = generateKey();
+        String saveKey = timeStamp + " Key: " + keyValue;
+        RandomString.saveDetails(saveKey);
         Cipher c = Cipher.getInstance(ALGO);
         c.init(Cipher.ENCRYPT_MODE, key);
         byte[] encVal = c.doFinal(Data.getBytes());
@@ -75,6 +75,7 @@ public class AESencrp {
         return decryptedValue;
     }
     private static Key generateKey() throws Exception {
+        keyValue = getKeyValueString(); //see if this generates random key string every request
         Key key = new SecretKeySpec(keyValue, ALGO);
         return key;
     }
