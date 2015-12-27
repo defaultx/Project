@@ -4,6 +4,8 @@ import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Created by rahul on 10/11/2015.
@@ -19,6 +21,9 @@ public class WorkerRunnable implements Runnable{
     private static String username = "root";
     private static String password = "password";
     private static ResultSet rset = null;
+    private String passwordEnc = null;
+    private String passwordDec = null;
+
 
     public WorkerRunnable(Socket clientSocket, String serverText) {
         this.clientSocket = clientSocket;
@@ -30,46 +35,42 @@ public class WorkerRunnable implements Runnable{
             DataInputStream input = new DataInputStream(clientSocket.getInputStream());
             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
             OutputStream output = clientSocket.getOutputStream();
+            long time = System.currentTimeMillis();
+            //just Time
+            DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
+            //System.out.println(df2.format(time));
             in_msg = input.readUTF();
             if(in_msg.indexOf('@') >= 0) {
                 email = in_msg;
                 System.out.println("Email Recieved: " + email);
-                connectToDatabse();
+                connectToDatabase();
                 String pass = getData(email);
                 System.out.println("Pass Code: " +pass);
                 out.writeUTF(pass);
                 out.flush();
                 //out.close();
             }
-            else
-            macAddress = in_msg;
+            else{
+                macAddress = in_msg;
+                try {
+                    passwordEnc = AESencrp.encrypt(macAddress);
+                    System.out.println("Received from client: " + macAddress);
+                    System.out.println("Request processed: " + df2.format(time));
+                    String timeStamp = RandomString.GetCurrentTimeStamp();
+                    String saveMac = timeStamp + " Mac: " + macAddress;
+                    RandomString.saveDetails(saveMac);
+                    System.out.println("Encrypted Text : " + passwordEnc);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
 
-            //macAddress = input.readUTF();
-            System.out.println("Received from client: " + macAddress);
-            long time = System.currentTimeMillis();
             output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
                     this.serverText + " - " +
                     time +
                     "").getBytes());
             output.close();
             input.close();
-            System.out.println("Request processed: " + time);
-            String passwordEnc = null;
-            String passwordDec = null;
-            String timeStamp = RandomString.GetCurrentTimeStamp();
-            String saveMac = timeStamp + " Mac: " + macAddress;
-
-
-            try {
-                RandomString.saveDetails(saveMac);
-                passwordEnc = AESencrp.encrypt(macAddress);
-                passwordDec = AESencrp.decrypt(passwordEnc);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            System.out.println("Encrypted Text : " + passwordEnc);
-            System.out.println("Decrypted Text : " + passwordDec);
 
         } catch (IOException e) {
             //report exception somewhere.
@@ -77,7 +78,7 @@ public class WorkerRunnable implements Runnable{
         }
     }
 
-    private static void connectToDatabse() {
+    private static void connectToDatabase() {
 
         try {
             Class.forName("com.mysql.jdbc.Driver");
