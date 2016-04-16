@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.Random;
 
@@ -37,5 +38,13 @@ public class RandomString {
             java.util.Date date= new java.util.Date();
             String timeStamp = String.valueOf(new Timestamp(date.getTime()));
         return timeStamp;
+    }
+
+    public static int getRandomPass(){
+        Random rand = new SecureRandom();
+        int min = 10000;
+        int max = 99999;
+        int pass = rand.nextInt(max - min);
+        return pass;
     }
 }

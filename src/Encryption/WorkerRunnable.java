@@ -51,24 +51,12 @@ public class WorkerRunnable implements Runnable{
             //while (input.available()> 0){
             in_msg = input.readUTF();
             System.out.println("Recieved message: "+in_msg);
+            System.out.println(in_msg.split(",")[1].trim());
+
             //}
             //if(in_msg != null) {
             //System.out.println(in_msg.split(",")[1]);
-            if (in_msg.split(",")[1].compareTo("getPass") > 0) {
-                String email = in_msg.split(",")[0].toLowerCase();
-                System.out.println("Email Recieved: " + email);
-                connectToDatabase();
-                String pass = getData(in_msg);
-                System.out.println("Pass Code: " + pass);
-                if(pass !=null) {
-                    out.writeUTF(pass);
-                    out.flush();
-                }else {
-                    out.close();
-                    input.close();
-                }
-                //out.close();
-            } else if (in_msg.contains("mac")) {
+            if (in_msg.split(",")[1].trim().equalsIgnoreCase("mac")) {
                 macAddress = in_msg.split(",")[0];
                 String email = in_msg.split(",")[2].toString();
                 try {
@@ -86,8 +74,25 @@ public class WorkerRunnable implements Runnable{
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-            } else if (in_msg.split(",")[1] == "mac") {
-
+            }else if (in_msg.split(",")[1].trim().equalsIgnoreCase("getPass")) {
+                String email = in_msg.split(",")[0].toLowerCase();
+                System.out.println("Email Recieved: " + email);
+                connectToDatabase();
+                String pass = getData(in_msg);
+                System.out.println("Pass Code: " + pass);
+                if(pass !=null) {
+                    out.writeUTF(pass);
+                    out.flush();
+                }else {
+                    out.close();
+                    input.close();
+                }
+                //out.close();
+            } else if (in_msg.split(",")[1].trim().equalsIgnoreCase("newPass")) {
+                String email = in_msg.split(",")[0].toLowerCase();
+                System.out.println("Email Recieved: " + email);
+                connectToDatabase();
+                String pass = getData(in_msg);
             }
             // }
 
@@ -121,14 +126,17 @@ public class WorkerRunnable implements Runnable{
         String pass = null;
         String result = null;
         String email = null;
+        int newPass;
+
         try {
             stmt = conn.createStatement();
             // We shall manage our transaction (because multiple SQL statements issued)
             conn.setAutoCommit(false);
 
             System.out.println("Type of request: " + data.split(",")[1]); //for debugging
+            System.out.println(data.split(",")[1].equals("newPass"));
 
-            if(data.split(",")[1].compareTo("getPass") > 0) {
+            if(data.split(",")[1].equalsIgnoreCase("getPass")) {
                 email = data.split(",")[0];
                 rset = stmt.executeQuery("SELECT pass FROM users WHERE email  = " + "'" + email + "'");
                 String test = "SELECT pass FROM users WHERE email  = " + "'" + data + "'";
@@ -137,10 +145,19 @@ public class WorkerRunnable implements Runnable{
                     pass = rset.getString("pass");
                 result = pass;
             }
-            else if(data.split(",")[1].compareTo("newPass") > 0) {
+            else if(data.split(",")[1].equalsIgnoreCase("newPass")) {
                 String userEmail = data.split(",")[0];
-                System.out.println("*****email******" + data.split(",")[0] + "************"); //for debugging
-                result = "newPass";
+                //System.out.println("*****email******" + data.split(",")[0]); //for debugging
+                //result = "newPass";
+                newPass = RandomString.getRandomPass();
+                System.out.println("Generated pass: " + newPass);
+                PreparedStatement stmt1 = conn.prepareStatement("UPDATE users SET pass = ? WHERE email  = ?");
+                stmt1.setInt(1, newPass);
+                stmt1.setString(2, userEmail);
+                stmt1.executeUpdate();
+                stmt1.close();
+                System.out.println("Password for: "+userEmail + " is changed to: " + newPass);
+                result = String.valueOf(newPass);
 
             }
             conn.commit();
@@ -149,7 +166,6 @@ public class WorkerRunnable implements Runnable{
         } catch (SQLException e1) {
             e1.printStackTrace();
         }
-        System.out.println("*********"+result+"***********");
         return result;
     }
 
