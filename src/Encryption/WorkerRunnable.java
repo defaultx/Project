@@ -1,11 +1,19 @@
 package Encryption;
 
+import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
+import sun.plugin2.message.Message;
+import sun.plugin2.message.transport.Transport;
+
 import java.awt.*;
 import java.io.*;
 import java.net.Socket;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Properties;
+import javax.mail.*;
+import javax.mail.internet.*;
+import javax.activation.*;
 
 /**
  * Created by rahul on 10/11/2015.
@@ -14,7 +22,6 @@ import java.text.SimpleDateFormat;
 public class WorkerRunnable implements Runnable{
     protected Socket clientSocket = null;
     protected String serverText   = null;
-    String macAddress = null, email = null, in_msg = null;
     static Connection conn = null;
     static Statement stmt = null;
     private static String databaseURL = "jdbc:mysql://localhost:3306/defaultx?autoReconnect=true&amp;useSSL=false";
@@ -31,6 +38,8 @@ public class WorkerRunnable implements Runnable{
     }
 
     public void run() {
+        String macAddress = null, in_msg = null;
+
         try {
             DataInputStream input = new DataInputStream(clientSocket.getInputStream());
             DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
@@ -39,19 +48,29 @@ public class WorkerRunnable implements Runnable{
             //just Time
             DateFormat df2 = new SimpleDateFormat("HH:mm:ss");
             //System.out.println(df2.format(time));
+            //while (input.available()> 0){
             in_msg = input.readUTF();
-            if(in_msg.indexOf('@') >= 0) {
-                email = in_msg;
+            System.out.println("Recieved message: "+in_msg);
+            //}
+            //if(in_msg != null) {
+            //System.out.println(in_msg.split(",")[1]);
+            if (in_msg.split(",")[1].compareTo("getPass") > 0) {
+                String email = in_msg.split(",")[0].toLowerCase();
                 System.out.println("Email Recieved: " + email);
                 connectToDatabase();
-                String pass = getData(email);
-                System.out.println("Pass Code: " +pass);
-                out.writeUTF(pass);
-                out.flush();
+                String pass = getData(in_msg);
+                System.out.println("Pass Code: " + pass);
+                if(pass !=null) {
+                    out.writeUTF(pass);
+                    out.flush();
+                }else {
+                    out.close();
+                    input.close();
+                }
                 //out.close();
-            }
-            else{
-                macAddress = in_msg;
+            } else if (in_msg.contains("mac")) {
+                macAddress = in_msg.split(",")[0];
+                String email = in_msg.split(",")[2].toString();
                 try {
                     passwordEnc = AESencrp.encrypt(macAddress);
                     System.out.println("Received from client: " + macAddress);
@@ -60,10 +79,17 @@ public class WorkerRunnable implements Runnable{
                     String saveMac = timeStamp + " Mac: " + macAddress;
                     RandomString.saveDetails(saveMac);
                     System.out.println("Encrypted Text : " + passwordEnc);
+                    setData("yes", email);
+                    out.writeUTF(passwordEnc);
+                    out.flush();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            } else if (in_msg.split(",")[1] == "mac") {
+
             }
+            // }
 
             output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
                     this.serverText + " - " +
@@ -91,23 +117,57 @@ public class WorkerRunnable implements Runnable{
         }
     }
 
-    private static String getData(String email) {
+    private static String getData(String data) {
         String pass = null;
+        String result = null;
+        String email = null;
         try {
             stmt = conn.createStatement();
             // We shall manage our transaction (because multiple SQL statements issued)
             conn.setAutoCommit(false);
-            rset = stmt.executeQuery("SELECT pass FROM users WHERE email  = " + "'" + email + "'");
-            String test = "SELECT pass FROM users WHERE email  = " + "'" + email + "'";
-            System.out.println("SQL: "+test);
-            if (rset.next())
-            pass = rset.getString("pass");
+
+            System.out.println("Type of request: " + data.split(",")[1]); //for debugging
+
+            if(data.split(",")[1].compareTo("getPass") > 0) {
+                email = data.split(",")[0];
+                rset = stmt.executeQuery("SELECT pass FROM users WHERE email  = " + "'" + email + "'");
+                String test = "SELECT pass FROM users WHERE email  = " + "'" + data + "'";
+                System.out.println("SQL: " + test);
+                if (rset.next())
+                    pass = rset.getString("pass");
+                result = pass;
+            }
+            else if(data.split(",")[1].compareTo("newPass") > 0) {
+                String userEmail = data.split(",")[0];
+                System.out.println("*****email******" + data.split(",")[0] + "************"); //for debugging
+                result = "newPass";
+
+            }
             conn.commit();
+            conn.close();
 
         } catch (SQLException e1) {
             e1.printStackTrace();
         }
-        return pass;
+        System.out.println("*********"+result+"***********");
+        return result;
+    }
+
+    private static void setData(String data, String email) {
+        connectToDatabase();
+        System.out.println("Seta data to : "+ data);
+        System.out.println("Seta data to Email : "+ email);
+        try {
+            stmt = conn.createStatement();
+            // We shall manage our transaction (because multiple SQL statements issued)
+            conn.setAutoCommit(false);
+            stmt.executeUpdate("UPDATE users SET active = " + "'" + data + "'" + "WHERE email =" + "'" + email + "'" );
+
+            conn.commit();
+            conn.close();
+        } catch (SQLException e1) {
+            e1.printStackTrace();
+        }
     }
 
 }

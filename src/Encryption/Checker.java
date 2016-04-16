@@ -7,7 +7,7 @@ public class Checker {
 
     public static void main(String[] args) throws Exception {
 
-        Server server = new Server(8081);
+        Server server = new Server(8080);
         new Thread (server).start();
 
         try {

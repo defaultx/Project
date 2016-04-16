@@ -38,6 +38,7 @@ public class layout {
     JLabel name_label = new JLabel("Name");
     JLabel email_label = new JLabel("Email");
     JLabel pass_label = new JLabel("One Time Pass");
+    JLabel active_label = new JLabel("Active user?");
     JLabel status_label = new JLabel("Database Status: ");
     JLabel refresh_label = new JLabel("Last updated on ");
     JLabel logo = new JLabel("logo goes here");
@@ -62,6 +63,7 @@ public class layout {
     static JTextArea names_txtArea = new JTextArea(20, 20);
     static JTextArea emails_txtArea = new JTextArea(20, 20);
     static JTextArea passes_txtArea = new JTextArea(20, 20);
+    static JTextArea active_txtArea = new JTextArea(20, 20);
 
     /**
      * Buttons
@@ -127,7 +129,8 @@ public class layout {
 
         panel_middle.add(name_label, "split 3,align left, pushx, growx, gapy 10, sg a");
         panel_middle.add(email_label, "align center,pushx, growx, sg a");
-        panel_middle.add(pass_label, "align right,pushx, growx, wrap, sg a");
+        panel_middle.add(pass_label, "align right,pushx, growx, sg a");
+        panel_middle.add(active_label, "align right,pushx, growx, wrap, sg a");
 
         panel_bottom.add(status_label, "split 2, align left");
         panel_bottom.add(status, "align left");
@@ -136,7 +139,8 @@ public class layout {
 
         panel_middle.add(new JScrollPane(names_txtArea), "align left, split 3, push, grow");
         panel_middle.add(new JScrollPane(emails_txtArea), "align center,push, grow");
-        panel_middle.add(new JScrollPane(passes_txtArea), "align right,push, grow, wrap");
+        panel_middle.add(new JScrollPane(passes_txtArea), "align right,push, grow");
+        panel_middle.add(new JScrollPane(active_txtArea), "align right,push, grow, wrap");
 
         status.setText("Disconnected");
         status.setForeground(Color.red);
@@ -151,22 +155,22 @@ public class layout {
             stmt = conn.createStatement();
             // We shall manage our transaction (because multiple SQL statements issued)
             conn.setAutoCommit(false);
-            rset = stmt.executeQuery("SELECT fname, email, pass FROM users");
+            rset = stmt.executeQuery("SELECT fname, email, pass, active FROM users");
             int totalCount = 0, activeCount = 0, inActiveCount = 0;
             emails_txtArea.setText(null);
             names_txtArea.setText(null);
             passes_txtArea.setText(null);
+            active_txtArea.setText(null);
             // displaying records
             while (rset.next()) {
                 names_txtArea.append(rset.getString("fname") + "\n-------------------------------------\n");
                 emails_txtArea.append(rset.getString("email") + "\n-------------------------------------\n");
-                if (rset.getString("pass").isEmpty()) {
-                    //passes_txtArea.append("null");
-                    inActiveCount++;
-                } else {
-                    passes_txtArea.append(rset.getString("pass") + "\n-------------------------------------\n");
+                active_txtArea.append(rset.getString("active") + "\n-------------------------------------\n");
+                passes_txtArea.append(rset.getString("pass") + "\n-------------------------------------\n");
+                if(rset.getString("active").equals("yes"))
                     activeCount++;
-                }
+                else
+                inActiveCount++;
                 totalCount++;
             }
             top_labelA1.setText(String.valueOf(totalCount));

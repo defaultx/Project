@@ -10,7 +10,7 @@ import java.io.IOException;
  * Multi threaded server
  */
 public class Server implements Runnable {
-protected int          serverPort   = 8081;
+protected int          serverPort   = 8080;
 protected ServerSocket serverSocket = null;
 protected boolean      isStopped    = false;
 protected Thread       runningThread= null;
