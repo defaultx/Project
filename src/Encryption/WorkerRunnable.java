@@ -6,7 +6,10 @@ import sun.plugin2.message.transport.Transport;
 
 import java.awt.*;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -14,6 +17,8 @@ import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.*;
 import javax.activation.*;
+
+import static javax.mail.Transport.send;
 
 /**
  * Created by rahul on 10/11/2015.
@@ -158,6 +163,13 @@ public class WorkerRunnable implements Runnable{
                 stmt1.close();
                 System.out.println("Password for: "+userEmail + " is changed to: " + newPass);
                 result = String.valueOf(newPass);
+                if(!isInternetReachable())
+                    System.out.println("No internet connection to send Email!");
+                else {
+                    System.out.println("Internet connection is available!");
+                    //sendEmail(userEmail);
+                }
+
 
             }
             conn.commit();
@@ -169,6 +181,11 @@ public class WorkerRunnable implements Runnable{
         return result;
     }
 
+    /**
+     * update data on the database
+     * @param data
+     * @param email
+     */
     private static void setData(String data, String email) {
         connectToDatabase();
         System.out.println("Seta data to : "+ data);
@@ -183,6 +200,83 @@ public class WorkerRunnable implements Runnable{
             conn.close();
         } catch (SQLException e1) {
             e1.printStackTrace();
+        }
+    }
+
+    /**
+     * checks for connection to the internet through dummy request
+     * @return
+     */
+    public static boolean isInternetReachable()
+    {
+        try {
+            //make a URL to a known source
+            URL url = new URL("http://www.google.com");
+
+            //open a connection to that source
+            HttpURLConnection urlConnect = (HttpURLConnection)url.openConnection();
+
+            //trying to retrieve data from the source. If there
+            //is no connection, this line will fail
+            Object objData = urlConnect.getContent();
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return false;
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * function to send html email to user
+     * @param email
+     */
+    public static void sendEmail(String email) {
+        // Recipient's email ID needs to be mentioned.
+        String to = email;
+
+        // Sender's email ID needs to be mentioned
+        String from = "noreply@keylesskey.com";
+
+        // Assuming you are sending email from localhost
+        String host = "localhost";
+
+        // Get system properties
+        Properties properties = System.getProperties();
+
+        // Setup mail server
+        properties.setProperty("mail.smtp.host", host);
+
+        // Get the default Session object.
+        Session session = Session.getDefaultInstance(properties);
+
+        try {
+            // Create a default MimeMessage object.
+            MimeMessage message = new MimeMessage(session);
+
+            // Set From: header field of the header.
+            message.setFrom(new InternetAddress(from));
+
+            // Set To: header field of the header.
+            message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
+
+            // Set Subject: header field
+            message.setSubject("This is the Subject Line!");
+
+            // Send the actual HTML message, as big as you like
+            message.setContent("<h1>This is actual message</h1>", "text/html");
+
+            // Send message
+            send(message);
+            System.out.println("Sent message successfully....");
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (javax.mail.MessagingException e) {
+            e.printStackTrace();
         }
     }
 
