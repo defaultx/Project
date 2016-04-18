@@ -18,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Created by rahul on 24/12/2015.
+ * desktop application to view database data using miglayout
+ * uses jdbc driver to connect to server
+ * uses sql query to fetch data from the database
  */
 public class layout {
 
@@ -150,6 +153,10 @@ public class layout {
         frame.setVisible(true);
     }
 
+    /**
+     * function to fetch data from the sql database using sql query and update the relevant
+     * text area with the data
+     */
     private static void getData() {
         try {
             stmt = conn.createStatement();
@@ -183,7 +190,10 @@ public class layout {
         }
     }
 
-    private static void connectToDatabse() {
+    /**
+     * function to get connection to the sql database using jdbc driver
+     */
+    private static void connectToDatabase() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conn = DriverManager.getConnection(databaseURL, username, password);
@@ -238,7 +248,7 @@ public class layout {
                 connect_btn.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        connectToDatabse();
+                        connectToDatabase();
                         ScheduledFuture<?> handle = scheduler.scheduleAtFixedRate(toRun, 1, 25, TimeUnit.SECONDS); //wait 1 sec after starting and then every 25 sec
                     }
                 });

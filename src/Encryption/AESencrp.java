@@ -1,25 +1,19 @@
-package Encryption; /**
+package Encryption;
+/**
  * Created by rahulthomas on 03/10/15.
  *
  * AES (acronym of Advanced Encryption Standard) is a symmetric encryption algorithm.
- The algorithm was developed by two Belgian cryptographer Joan Daemen and Vincent Rijmen.
- AES was designed to be efficient in both hardware and software, and supports a block length of
- 128 bits and key lengths of 128, 192, and 256 bits.
-
- AES encryption is used by U.S. for securing sensitive but unclassified material, so we can say it is enough secure.
-
-
+ * The algorithm was developed by two Belgian cryptographer Joan Daemen and Vincent Rijmen.
+ * AES was designed to be efficient in both hardware and software, and supports a block length of
+ * 128 bits and key lengths of 128, 192, and 256 bits.
+ * AES encryption is used by U.S. for securing sensitive but unclassified material, so we can say it is enough secure.
  **/
-import java.io.Console;
 import java.nio.charset.Charset;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.Scanner;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
-
 import sun.misc.*;
 
 public class AESencrp {
@@ -35,7 +29,10 @@ public class AESencrp {
         return usedKey;
     }
 
-    /** use SHA-1 to generate a hash from your key and trim the result to 128 bit (16 bytes) */
+    /**
+     * function to use SHA-1 to generate a hash from your key and trim the result to 128 bit (16 bytes)
+     * @return
+     */
     public static byte[] getKeyValueString() {
         String keyValueString = getRandomString();
         System.out.println("Generated String: " + keyValueString);
@@ -51,6 +48,12 @@ public class AESencrp {
         return keyb;
     }
 
+    /**
+     * function to encrypt the string with generated key
+     * @param Data
+     * @return
+     * @throws Exception
+     */
     public static String encrypt(String Data) throws Exception {
         System.out.println("Mac Address: " + Data);
         String timeStamp = RandomString.GetCurrentTimeStamp();
@@ -65,6 +68,12 @@ public class AESencrp {
         return encryptedValue;
     }
 
+    /**
+     * function to decrypt encrypted string using AES algorithm
+     * @param encryptedData
+     * @return
+     * @throws Exception
+     */
     public static String decrypt(String encryptedData) throws Exception {
         Key key = generateKey();
         Cipher c = Cipher.getInstance(ALGO);
@@ -74,6 +83,12 @@ public class AESencrp {
         String decryptedValue = new String(decValue);
         return decryptedValue;
     }
+
+    /**
+     * function to generate a secret key for the encryption
+     * @return
+     * @throws Exception
+     */
     private static Key generateKey() throws Exception {
         keyValue = getKeyValueString(); //see if this generates random key string every request
         Key key = new SecretKeySpec(keyValue, ALGO);

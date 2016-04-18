@@ -1,19 +1,18 @@
 package Encryption;
 
-import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 
 /**
  * Created by rahul on 10/11/2015.
- * Multi threaded server
+ * Multi threaded server with a worker runnable class to handle requests
  */
 public class Server implements Runnable {
-protected int          serverPort   = 8080;
-protected ServerSocket serverSocket = null;
-protected boolean      isStopped    = false;
-protected Thread       runningThread= null;
+    protected int          serverPort   = 8080;
+    protected ServerSocket serverSocket = null;
+    protected boolean      isStopped    = false;
+    protected Thread       runningThread= null;
 
     public Server(int port){
         this.serverPort = port;

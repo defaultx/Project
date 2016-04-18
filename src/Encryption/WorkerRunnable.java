@@ -1,10 +1,5 @@
 package Encryption;
 
-import com.sun.xml.internal.messaging.saaj.packaging.mime.MessagingException;
-import sun.plugin2.message.Message;
-import sun.plugin2.message.transport.Transport;
-
-import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.Socket;
@@ -16,7 +11,6 @@ import java.text.SimpleDateFormat;
 import java.util.Properties;
 import javax.mail.*;
 import javax.mail.internet.*;
-import javax.activation.*;
 
 import static javax.mail.Transport.send;
 
@@ -114,6 +108,9 @@ public class WorkerRunnable implements Runnable{
         }
     }
 
+    /**
+     * function to get connection to the sql database using jdbc driver
+     */
     private static void connectToDatabase() {
 
         try {
@@ -127,6 +124,11 @@ public class WorkerRunnable implements Runnable{
         }
     }
 
+    /**
+     * function to fetch data from the sql database using sql query
+     * @param data
+     * @return
+     */
     private static String getData(String data) {
         String pass = null;
         String result = null;
@@ -182,7 +184,7 @@ public class WorkerRunnable implements Runnable{
     }
 
     /**
-     * update data on the database
+     * update data on the database using sql query
      * @param data
      * @param email
      */
