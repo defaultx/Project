@@ -52,9 +52,7 @@ public class WorkerRunnable implements Runnable{
             System.out.println("Recieved message: "+in_msg);
             System.out.println(in_msg.split(",")[1].trim());
 
-            //}
-            //if(in_msg != null) {
-            //System.out.println(in_msg.split(",")[1]);
+
             if (in_msg.split(",")[1].trim().equalsIgnoreCase("mac")) {
                 macAddress = in_msg.split(",")[0];
                 String email = in_msg.split(",")[2].toString();
@@ -86,14 +84,19 @@ public class WorkerRunnable implements Runnable{
                     out.close();
                     input.close();
                 }
-                //out.close();
             } else if (in_msg.split(",")[1].trim().equalsIgnoreCase("newPass")) {
                 String email = in_msg.split(",")[0].toLowerCase();
                 System.out.println("Email Recieved: " + email);
                 connectToDatabase();
                 String pass = getData(in_msg);
+                if(pass !=null) {
+                    out.writeUTF(pass);
+                    out.flush();
+                }else {
+                    out.close();
+                    input.close();
+                }
             }
-            // }
 
             output.write(("HTTP/1.1 200 OK\n\nWorkerRunnable: " +
                     this.serverText + " - " +
@@ -141,7 +144,6 @@ public class WorkerRunnable implements Runnable{
             conn.setAutoCommit(false);
 
             System.out.println("Type of request: " + data.split(",")[1]); //for debugging
-            System.out.println(data.split(",")[1].equals("newPass"));
 
             if(data.split(",")[1].equalsIgnoreCase("getPass")) {
                 email = data.split(",")[0];
