@@ -65,7 +65,10 @@ public class WorkerRunnable implements Runnable{
                     RandomString.saveDetails(saveMac);
                     System.out.println("Encrypted Text : " + passwordEnc);
                     setData("yes", email);
-                    out.writeUTF(passwordEnc);
+                    //out.writeUTF(passwordEnc); //send encrypted password to phone
+                    connectToDatabase();
+                    String room = getData(in_msg);
+                    out.writeUTF(room);
                     out.flush();
 
                 } catch (Exception e) {
@@ -135,7 +138,7 @@ public class WorkerRunnable implements Runnable{
     private static String getData(String data) {
         String pass = null;
         String result = null;
-        String email = null;
+        //String email = null;
         int newPass;
 
         try {
@@ -146,7 +149,7 @@ public class WorkerRunnable implements Runnable{
             System.out.println("Type of request: " + data.split(",")[1]); //for debugging
 
             if(data.split(",")[1].equalsIgnoreCase("getPass")) {
-                email = data.split(",")[0];
+                String email = data.split(",")[0];
                 rset = stmt.executeQuery("SELECT pass FROM users WHERE email  = " + "'" + email + "'");
                 String test = "SELECT pass FROM users WHERE email  = " + "'" + data + "'";
                 System.out.println("SQL: " + test);
@@ -173,8 +176,14 @@ public class WorkerRunnable implements Runnable{
                     System.out.println("Internet connection is available!");
                     //sendEmail(userEmail);
                 }
-
-
+            } else if(data.split(",")[1].equalsIgnoreCase("mac")){
+                String email = data.split(",")[2];
+                String room = null;
+                rset = stmt.executeQuery("SELECT room FROM users WHERE email  = " + "'" + email + "'");
+                if (rset.next())
+                    room = rset.getString("room");
+                result = room;
+                System.out.println("Room number of " + email + " is: " + room);
             }
             conn.commit();
             conn.close();

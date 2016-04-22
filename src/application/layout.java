@@ -240,7 +240,7 @@ public class layout {
             pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE email = ?");
             pstmt.setString(1, detail);
         }
-        else if(detail.matches("^[0-9]{4}$")){ //check to see if its a room number which has 4 numbers between 0 and 9
+        else if(detail.matches("^[0-9]{3}$")){ //check to see if its a room number which has 4 numbers between 0 and 9
             pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE room = ?");
             pstmt.setString(1, detail);
         }
