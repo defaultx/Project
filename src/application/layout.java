@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
  * desktop application to view database data using miglayout
  * uses jdbc driver to connect to server
  * uses sql query to fetch data from the database
+ * uses java scheduler function to automatically refresh every set seconds
  */
 public class layout {
 
@@ -41,6 +42,7 @@ public class layout {
     JLabel name_label = new JLabel("Name");
     JLabel email_label = new JLabel("Email");
     JLabel pass_label = new JLabel("One Time Pass");
+    JLabel room_label = new JLabel("Room");
     JLabel active_label = new JLabel("Active user?");
     JLabel status_label = new JLabel("Database Status: ");
     JLabel refresh_label = new JLabel("Last updated on ");
@@ -55,7 +57,7 @@ public class layout {
     /**
      * Text Field
      **/
-    // JTextField top_labelA1 = new JTextField("null");
+     static JTextField search_txt = new JTextField(20);
     // JTextField top_labelA2 = new JTextField("null");
     // JTextField top_labelA3 = new JTextField("null");
 
@@ -65,7 +67,8 @@ public class layout {
      **/
     static JTextArea names_txtArea = new JTextArea(20, 20);
     static JTextArea emails_txtArea = new JTextArea(20, 20);
-    static JTextArea passes_txtArea = new JTextArea(20, 20);
+    static JTextArea passes_txtArea = new JTextArea(10, 20);
+    static JTextArea room_txtArea = new JTextArea(10, 20);
     static JTextArea active_txtArea = new JTextArea(20, 20);
 
     /**
@@ -73,12 +76,13 @@ public class layout {
      **/
     static JButton refresh_btn = new JButton("Refresh Data");
     static JButton connect_btn = new JButton("Connect to Database");
+    static JButton search_btn = new JButton("Search");
     //JButton refresh = new JButton("Refresh Data");
 
     public layout() {
         frame = new JFrame("Rahul");
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-        frame.setLocation(300, 400);
+        frame.setLocation(100, 100);
         frame.setLayout(new BorderLayout());
 
         /*** Jpanels **/
@@ -112,6 +116,7 @@ public class layout {
         emails_txtArea.setEditable(false);
         passes_txtArea.setEditable(false);
         refresh_btn.setEnabled(false);
+        search_btn.setEnabled(true);
 
         panel_root.add(panel_topLeft, "split 3, pushx, growx, sg 1");
         panel_root.add(panel_topCenter, "pushx, growx, sg 1");
@@ -133,16 +138,20 @@ public class layout {
         panel_middle.add(name_label, "split 3,align left, pushx, growx, gapy 10, sg a");
         panel_middle.add(email_label, "align center,pushx, growx, sg a");
         panel_middle.add(pass_label, "align right,pushx, growx, sg a");
+        panel_middle.add(room_label, "align right,pushx, growx, sg a");
         panel_middle.add(active_label, "align right,pushx, growx, wrap, sg a");
 
         panel_bottom.add(status_label, "split 2, align left");
         panel_bottom.add(status, "align left");
+        panel_bottom.add(search_txt, "split 2, align right, pushx");
+        panel_bottom.add(search_btn, "align center, pushx");
         panel_bottom.add(refresh_label, "split 2,align right, pushx");
         panel_bottom.add(refresh_status, "pushx, wrap");
 
         panel_middle.add(new JScrollPane(names_txtArea), "align left, split 3, push, grow");
         panel_middle.add(new JScrollPane(emails_txtArea), "align center,push, grow");
         panel_middle.add(new JScrollPane(passes_txtArea), "align right,push, grow");
+        panel_middle.add(new JScrollPane(room_txtArea), "align right,push, grow");
         panel_middle.add(new JScrollPane(active_txtArea), "align right,push, grow, wrap");
 
         status.setText("Disconnected");
@@ -162,18 +171,20 @@ public class layout {
             stmt = conn.createStatement();
             // We shall manage our transaction (because multiple SQL statements issued)
             conn.setAutoCommit(false);
-            rset = stmt.executeQuery("SELECT fname, email, pass, active FROM users");
+            rset = stmt.executeQuery("SELECT fname, email, pass, room, active FROM users");
             int totalCount = 0, activeCount = 0, inActiveCount = 0;
             emails_txtArea.setText(null);
             names_txtArea.setText(null);
             passes_txtArea.setText(null);
             active_txtArea.setText(null);
+            room_txtArea.setText(null);
             // displaying records
             while (rset.next()) {
                 names_txtArea.append(rset.getString("fname") + "\n-------------------------------------\n");
                 emails_txtArea.append(rset.getString("email") + "\n-------------------------------------\n");
                 active_txtArea.append(rset.getString("active") + "\n-------------------------------------\n");
                 passes_txtArea.append(rset.getString("pass") + "\n-------------------------------------\n");
+                room_txtArea.append(rset.getString("room") + "\n-------------------------------------\n");
                 if(rset.getString("active").equals("yes"))
                     activeCount++;
                 else
@@ -213,14 +224,55 @@ public class layout {
         }
     }
 
+    public static void search(String detail) throws SQLException {
+        stmt = conn.createStatement();
+        PreparedStatement pstmt = null;
+        // We shall manage our transaction (because multiple SQL statements issued)
+        conn.setAutoCommit(false);
+        int totalCount = 0, activeCount = 0, inActiveCount = 0;
+        emails_txtArea.setText(null);
+        names_txtArea.setText(null);
+        passes_txtArea.setText(null);
+        active_txtArea.setText(null);
+        room_txtArea.setText(null);
+
+        if(detail.contains("@")){ //check to see if it's an email
+            pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE email = ?");
+            pstmt.setString(1, detail);
+        }
+        else if(detail.matches("^[0-9]{4}$")){ //check to see if its a room number which has 4 numbers between 0 and 9
+            pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE room = ?");
+            pstmt.setString(1, detail);
+        }
+        else{ //last search option is name
+            pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE fname = ?");
+            pstmt.setString(1, detail);
+        }
+
+        rset = pstmt.executeQuery();
+
+        // displaying records
+        while (rset.next()) {
+            names_txtArea.append(rset.getString("fname") + "\n-------------------------------------\n");
+            emails_txtArea.append(rset.getString("email") + "\n-------------------------------------\n");
+            active_txtArea.append(rset.getString("active") + "\n-------------------------------------\n");
+            passes_txtArea.append(rset.getString("pass") + "\n-------------------------------------\n");
+            room_txtArea.append(rset.getString("room") + "\n-------------------------------------\n");
+        }
+
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
+            ScheduledFuture<?> handle;
+            boolean finishedSearch = false;
             @Override
             public void run() {
                 new layout();
 
                 /** Schedule Executor service to refresh data ever set seconds **/
                 ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
                 Runnable toRun = new Runnable() {
                     public void run() {
                         Date date = new Date(System.currentTimeMillis());
@@ -241,7 +293,12 @@ public class layout {
                 refresh_btn.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
+                        finishedSearch = true;
                         toRun.run();
+                        if(finishedSearch = true) {
+                            handle = scheduler.scheduleAtFixedRate(toRun, 1, 25, TimeUnit.SECONDS); //wait 1 sec after starting and then every 25 sec
+                            finishedSearch = false;
+                        }
                     }
                 });
 
@@ -249,48 +306,69 @@ public class layout {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         connectToDatabase();
-                        ScheduledFuture<?> handle = scheduler.scheduleAtFixedRate(toRun, 1, 25, TimeUnit.SECONDS); //wait 1 sec after starting and then every 25 sec
+                        handle = scheduler.scheduleAtFixedRate(toRun, 1, 25, TimeUnit.SECONDS); //wait 1 sec after starting and then every 25 sec
                     }
                 });
 
-                /** Safely close all connections and stop all tasks before exiting **/
-                frame.addWindowListener(new WindowAdapter() {
+                search_btn.addActionListener(new ActionListener() {
                     @Override
-                    public void windowClosing(WindowEvent e) {
-                        if (JOptionPane.showConfirmDialog(frame,
-                                "Are you sure to exit the app?", "Quit",
-                                JOptionPane.YES_NO_OPTION,
-                                JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
-
-                            if (!scheduler.isShutdown())
-                                scheduler.shutdown();
-
-                            if (rset != null)
-                                try {
-                                    rset.close();
-                                } catch (SQLException e1) {
-                                }
-                            if (stmt != null)
-                                try {
-                                    stmt.close();
-                                } catch (SQLException e1) {
-                                    e1.printStackTrace();
-                                }
-                            if (conn != null)
-                                try {
-                                    conn.close();
-                                } catch (SQLException e1) {
-                                    e1.printStackTrace();
-                                }
-                            System.exit(0);
-                        } else {
-
+                    public void actionPerformed(ActionEvent e) {
+                        if (search_txt.getText() != null) {
+                            handle.cancel(true);
+                            connectToDatabase();
+                            try {
+                                search(search_txt.getText());
+                            } catch (SQLException e1) {
+                                e1.printStackTrace();
+                            }
                         }
-                        // super.windowClosing(e);
+                        }
                     }
-                });
-            }
-        });
+
+                    );
+
+                    /** Safely close all connections and stop all tasks before exiting **/
+                frame.addWindowListener(new
+
+                                                WindowAdapter() {
+                                                    @Override
+                                                    public void windowClosing(WindowEvent e) {
+                                                        if (JOptionPane.showConfirmDialog(frame,
+                                                                "Are you sure to exit the app?", "Quit",
+                                                                JOptionPane.YES_NO_OPTION,
+                                                                JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION) {
+
+                                                            if (!scheduler.isShutdown())
+                                                                scheduler.shutdown();
+
+                                                            if (rset != null)
+                                                                try {
+                                                                    rset.close();
+                                                                } catch (SQLException e1) {
+                                                                }
+                                                            if (stmt != null)
+                                                                try {
+                                                                    stmt.close();
+                                                                } catch (SQLException e1) {
+                                                                    e1.printStackTrace();
+                                                                }
+                                                            if (conn != null)
+                                                                try {
+                                                                    conn.close();
+                                                                } catch (SQLException e1) {
+                                                                    e1.printStackTrace();
+                                                                }
+                                                            System.exit(0);
+                                                        } else {
+
+                                                        }
+                                                        // super.windowClosing(e);
+                                                    }
+                                                }
+
+                );
+                }
+            });
     }
 }
 
