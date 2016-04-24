@@ -82,6 +82,9 @@ public class WorkerRunnable implements Runnable {
                     String room = getData(in_msg);
                     out.writeUTF(room);
                     out.flush();
+                    connectToDoor(room101);
+                    sendMessageToDoor("keycard id");
+                    closeDoorStreams();
 
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -348,6 +351,7 @@ public class WorkerRunnable implements Runnable {
         System.out.println("Streams are setup!");
     }
 
+    //for debug
     private void commWithDoor() throws IOException {
         sendMessageToDoor("hello server \n");
         // ableToType(true); //makes the user able to type
