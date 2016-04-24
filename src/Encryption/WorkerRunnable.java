@@ -375,10 +375,18 @@ public class WorkerRunnable implements Runnable {
 
     }
 
+    /**
+     * function to print message on screen
+     * @param message
+     */
     private void showMessage(final String message) {
         System.out.println(message);
     }
 
+    /**
+     * function to send a message(String) to the door
+     * @param message
+     */
     private void sendMessageToDoor(String message) {
         try {
             outputD.write(message + '\n');
@@ -389,6 +397,9 @@ public class WorkerRunnable implements Runnable {
         }
     }
 
+    /**
+     * function to close all the in/out streams with the door
+     */
     private void closeDoorStreams() {
         showMessage("Closing streams...");
         try {
