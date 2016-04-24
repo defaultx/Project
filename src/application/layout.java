@@ -57,7 +57,7 @@ public class layout {
     /**
      * Text Field
      **/
-     static JTextField search_txt = new JTextField(20);
+    static JTextField search_txt = new JTextField(20);
     // JTextField top_labelA2 = new JTextField("null");
     // JTextField top_labelA3 = new JTextField("null");
 
@@ -185,10 +185,10 @@ public class layout {
                 active_txtArea.append(rset.getString("active") + "\n-------------------------------------\n");
                 passes_txtArea.append(rset.getString("pass") + "\n-------------------------------------\n");
                 room_txtArea.append(rset.getString("room") + "\n-------------------------------------\n");
-                if(rset.getString("active").equals("yes"))
+                if (rset.getString("active").equals("yes"))
                     activeCount++;
                 else
-                inActiveCount++;
+                    inActiveCount++;
                 totalCount++;
             }
             top_labelA1.setText(String.valueOf(totalCount));
@@ -236,15 +236,13 @@ public class layout {
         active_txtArea.setText(null);
         room_txtArea.setText(null);
 
-        if(detail.contains("@")){ //check to see if it's an email
+        if (detail.contains("@")) { //check to see if it's an email
             pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE email = ?");
             pstmt.setString(1, detail);
-        }
-        else if(detail.matches("^[0-9]{3}$")){ //check to see if its a room number which has 4 numbers between 0 and 9
+        } else if (detail.matches("^[0-9]{3}$")) { //check to see if its a room number which has 4 numbers between 0 and 9
             pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE room = ?");
             pstmt.setString(1, detail);
-        }
-        else{ //last search option is name
+        } else { //last search option is name
             pstmt = conn.prepareStatement("SELECT fname, email, pass, active, room FROM users WHERE fname = ?");
             pstmt.setString(1, detail);
         }
@@ -266,6 +264,7 @@ public class layout {
         SwingUtilities.invokeLater(new Runnable() {
             ScheduledFuture<?> handle;
             boolean finishedSearch = false;
+
             @Override
             public void run() {
                 new layout();
@@ -295,7 +294,7 @@ public class layout {
                     public void actionPerformed(ActionEvent e) {
                         finishedSearch = true;
                         toRun.run();
-                        if(finishedSearch = true) {
+                        if (finishedSearch = true) {
                             handle = scheduler.scheduleAtFixedRate(toRun, 1, 25, TimeUnit.SECONDS); //wait 1 sec after starting and then every 25 sec
                             finishedSearch = false;
                         }
@@ -311,23 +310,23 @@ public class layout {
                 });
 
                 search_btn.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (search_txt.getText() != null) {
-                            handle.cancel(true);
-                            connectToDatabase();
-                            try {
-                                search(search_txt.getText());
-                            } catch (SQLException e1) {
-                                e1.printStackTrace();
-                            }
-                        }
-                        }
-                    }
+                                                 @Override
+                                                 public void actionPerformed(ActionEvent e) {
+                                                     if (search_txt.getText() != null) {
+                                                         handle.cancel(true);
+                                                         connectToDatabase();
+                                                         try {
+                                                             search(search_txt.getText());
+                                                         } catch (SQLException e1) {
+                                                             e1.printStackTrace();
+                                                         }
+                                                     }
+                                                 }
+                                             }
 
-                    );
+                );
 
-                    /** Safely close all connections and stop all tasks before exiting **/
+                /** Safely close all connections and stop all tasks before exiting **/
                 frame.addWindowListener(new
 
                                                 WindowAdapter() {
@@ -367,8 +366,8 @@ public class layout {
                                                 }
 
                 );
-                }
-            });
+            }
+        });
     }
 }
 

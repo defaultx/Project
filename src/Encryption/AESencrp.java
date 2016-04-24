@@ -1,19 +1,21 @@
 package Encryption;
 /**
  * Created by rahulthomas on 03/10/15.
- *
+ * <p>
  * AES (acronym of Advanced Encryption Standard) is a symmetric encryption algorithm.
  * The algorithm was developed by two Belgian cryptographer Joan Daemen and Vincent Rijmen.
  * AES was designed to be efficient in both hardware and software, and supports a block length of
  * 128 bits and key lengths of 128, 192, and 256 bits.
  * AES encryption is used by U.S. for securing sensitive but unclassified material, so we can say it is enough secure.
  **/
+
 import java.nio.charset.Charset;
 import java.security.*;
 import java.util.Arrays;
 import java.util.Random;
 import javax.crypto.*;
 import javax.crypto.spec.SecretKeySpec;
+
 import sun.misc.*;
 
 public class AESencrp {
@@ -22,7 +24,7 @@ public class AESencrp {
     private static byte[] keyValue;// = getKeyValueString();
 
     /** create a random string to use as keyword for encryption **/
-    private static String getRandomString(){
+    private static String getRandomString() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrst";
         Random rng = new Random();
         String usedKey = RandomString.generateString(rng, chars, 15);

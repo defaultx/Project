@@ -9,27 +9,27 @@ import java.io.IOException;
  * Multi threaded server with a worker runnable class to handle requests
  */
 public class Server implements Runnable {
-    protected int          serverPort   = 8080;
+    protected int serverPort = 8080;
     protected ServerSocket serverSocket = null;
-    protected boolean      isStopped    = false;
-    protected Thread       runningThread= null;
+    protected boolean isStopped = false;
+    protected Thread runningThread = null;
 
-    public Server(int port){
+    public Server(int port) {
         this.serverPort = port;
     }
 
-    public void run(){
-        synchronized(this){
+    public void run() {
+        synchronized (this) {
             this.runningThread = Thread.currentThread();
         }
         openServerSocket();
-        while(! isStopped()){
+        while (!isStopped()) {
             Socket clientSocket = null;
             try {
                 clientSocket = this.serverSocket.accept();
             } catch (IOException e) {
-                if(isStopped()) {
-                    System.out.println("Server Stopped.") ;
+                if (isStopped()) {
+                    System.out.println("Server Stopped.");
                     return;
                 }
                 throw new RuntimeException(
@@ -40,7 +40,7 @@ public class Server implements Runnable {
                             clientSocket, "Multithreaded Server")
             ).start();
         }
-        System.out.println("Server Stopped.") ;
+        System.out.println("Server Stopped.");
     }
 
 
@@ -48,7 +48,7 @@ public class Server implements Runnable {
         return this.isStopped;
     }
 
-    public synchronized void stop(){
+    public synchronized void stop() {
         this.isStopped = true;
         try {
             this.serverSocket.close();
@@ -61,7 +61,7 @@ public class Server implements Runnable {
         try {
             this.serverSocket = new ServerSocket(this.serverPort);
         } catch (IOException e) {
-            throw new RuntimeException("Cannot open port "+ serverPort, e);
+            throw new RuntimeException("Cannot open port " + serverPort, e);
         }
     }
 
