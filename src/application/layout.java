@@ -2,12 +2,16 @@ package application;
 
 import net.miginfocom.swing.MigLayout;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -46,7 +50,7 @@ public class layout {
     JLabel active_label = new JLabel("Active user?");
     JLabel status_label = new JLabel("Database Status: ");
     JLabel refresh_label = new JLabel("Last updated on ");
-    JLabel logo = new JLabel("logo goes here");
+    JLabel logo;
 
     static JLabel top_labelA1 = new JLabel("null");
     static JLabel top_labelA2 = new JLabel("null");
@@ -117,6 +121,16 @@ public class layout {
         passes_txtArea.setEditable(false);
         refresh_btn.setEnabled(false);
         search_btn.setEnabled(true);
+
+        String path = "logo-02.png";
+        BufferedImage logo1 = null;
+        try {
+            logo1 = ImageIO.read(new File(path));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        logo = new JLabel(new ImageIcon(logo1));
 
         panel_root.add(panel_topLeft, "split 3, pushx, growx, sg 1");
         panel_root.add(panel_topCenter, "pushx, growx, sg 1");

@@ -83,7 +83,8 @@ public class WorkerRunnable implements Runnable {
                     out.writeUTF(room);
                     out.flush();
                     connectToDoor(room101);
-                    sendMessageToDoor("14033244135");
+                    sendMessageToDoor("date-14:30:00-04/26/16");
+                    sendMessageToDoor("id:14033244135");
                     closeDoorStreams();
 
                 } catch (Exception e) {
