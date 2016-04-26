@@ -16,8 +16,8 @@ import javax.mail.internet.*;
 import static javax.mail.Transport.send;
 
 /**
+ * worker thread that processes the request so server can focus on accepting connections.
  * Created by rahul on 10/11/2015.
- * worker thread that processes the request so server can focus on accepting connections
  */
 public class WorkerRunnable implements Runnable {
     protected Socket clientSocket = null;
@@ -35,12 +35,13 @@ public class WorkerRunnable implements Runnable {
     private BufferedReader inputD;
     private Socket connection;
     private String message = "";
+    private boolean connectedToDoor = false;
 
     //room door ip addresses
     private String room101 = "192.168.1.100";
 
     //port for all doors
-    private static int doorPort = 8080;
+    private static int doorPort = 8088;
 
 
     public WorkerRunnable(Socket clientSocket, String serverText) {
@@ -83,7 +84,7 @@ public class WorkerRunnable implements Runnable {
                     out.writeUTF(room);
                     out.flush();
                     connectToDoor(room101);
-                    sendMessageToDoor("keycard id");
+                    sendMessageToDoor("14033244135");
                     closeDoorStreams();
 
                 } catch (Exception e) {
@@ -189,7 +190,7 @@ public class WorkerRunnable implements Runnable {
                     System.out.println("No internet connection to send Email!");
                 else {
                     System.out.println("Internet connection is available!");
-                    sendEmail(userEmail);
+                    //sendEmail(userEmail);
                 }
             } else if (data.split(",")[1].equalsIgnoreCase("mac")) {
                 String email = data.split(",")[2];
@@ -309,10 +310,11 @@ public class WorkerRunnable implements Runnable {
 
     /**
      * Function to get connected to the requested door for data transfer
+     * door is acting as the server and this server is acting as clinet for the door
      * @param ipAddress
      */
     public void connectToDoor(String ipAddress) {
-        while (true) {
+        while (!connectedToDoor) {
             try {
                 tryToConnect(ipAddress, doorPort);
                 setupStreams();
@@ -336,6 +338,7 @@ public class WorkerRunnable implements Runnable {
     private void tryToConnect(String ip, int port) throws IOException {
         System.out.println("Attempting to connect to address " + ip);
         connection = new Socket(ip, port); //once someone asks to connect, it accepts the connection to the socket this gets repeated fast
+        connectedToDoor = true;
         System.out.println("Now connected to " + connection.getInetAddress().getHostName()); //shows IP adress of client
     }
 
@@ -410,6 +413,8 @@ public class WorkerRunnable implements Runnable {
             outputD.close();
             inputD.close();
             connection.close();
+            connectedToDoor = false;
+            showMessage("Streams Closed!");
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -17,11 +17,11 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * desktop application to view database data using miglayout.
+ * uses jdbc driver to connect to server.
+ * uses sql query to fetch data from the database.
+ * uses java scheduler function to automatically refresh every set seconds.
  * Created by rahul on 24/12/2015.
- * desktop application to view database data using miglayout
- * uses jdbc driver to connect to server
- * uses sql query to fetch data from the database
- * uses java scheduler function to automatically refresh every set seconds
  */
 public class layout {
 
@@ -224,6 +224,11 @@ public class layout {
         }
     }
 
+    /**
+     * function to search for requested data in the database and to show the result
+     * @param detail
+     * @throws SQLException
+     */
     public static void search(String detail) throws SQLException {
         stmt = conn.createStatement();
         PreparedStatement pstmt = null;

@@ -1,6 +1,7 @@
 package Encryption;
 
 /**
+ * Class to start the server and any other required services.
  * Created by rahulthomas on 03/10/15.
  */
 public class Checker {
