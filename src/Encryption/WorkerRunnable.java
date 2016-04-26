@@ -12,7 +12,6 @@ import java.util.Properties;
 import java.util.Scanner;
 import javax.mail.*;
 import javax.mail.internet.*;
-
 import static javax.mail.Transport.send;
 
 /**
@@ -190,7 +189,7 @@ public class WorkerRunnable implements Runnable {
                     System.out.println("No internet connection to send Email!");
                 else {
                     System.out.println("Internet connection is available!");
-                    //sendEmail(userEmail);
+                    //sendEmail(userEmail,newPass);
                 }
             } else if (data.split(",")[1].equalsIgnoreCase("mac")) {
                 String email = data.split(",")[2];
@@ -265,7 +264,7 @@ public class WorkerRunnable implements Runnable {
      *
      * @param email
      */
-    public static void sendEmail(String email) {
+    public static void sendEmail(String email, int pass) {
         // Recipient's email ID needs to be mentioned.
         String to = email;
 
@@ -295,10 +294,10 @@ public class WorkerRunnable implements Runnable {
             message.addRecipient(javax.mail.Message.RecipientType.TO, new InternetAddress(to));
 
             // Set Subject: header field
-            message.setSubject("This is the Subject Line!");
+            message.setSubject("Keyless Key - New Pass Code");
 
             // Send the actual HTML message, as big as you like
-            message.setContent("<h1>This is actual message</h1>", "text/html");
+            message.setContent("<h1>Your new pass code is "+ pass +"</h1>", "text/html");
 
             // Send message
             send(message);
